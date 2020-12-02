@@ -1,5 +1,7 @@
 # Aplikasi Pengarsipan Surat
 
+**Status** : Development
+
 Mendigitalisasi arsip surat berbasis web. Surat yang didalam termasuk surat masuk dan surat keluar termasuk disposisi.
 
 Framework yang Digunakan:
