@@ -15,7 +15,9 @@ class LoginController extends Controller
 
     public function authenticate(Request $request)
     {
-        $credentials = $request->only('username', 'password');
+        $credentials = $request->validate(['username'=>'required|min:3','password'=>'required|min:8']);
+// dd($credentials);
+        // $credentials = $request->only('username', 'password');
 
         if (Auth::attempt($credentials)) {
             return redirect()->route('home')->with('loginToast', ['loginSuccess' => true]);
