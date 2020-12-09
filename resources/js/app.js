@@ -52,7 +52,7 @@ const app = createApp({
         }
     })
 })
-app.provide('Lang', readonly(ID_ID))
+app.provide('lang', readonly(ID_ID))
 app.use(plugin)
 app.use(Toast, optionsToast)
 app.mount(el)

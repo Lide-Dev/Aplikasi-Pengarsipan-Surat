@@ -1,13 +1,13 @@
 <template>
   <div
-    class="column col-4 icon"
+    class="column col-3 icon"
     :class="{ 'has-children': content.hasChildren }"
   >
     <i v-show="content.hasChildren" :class="iconToggleChildren"></i>
     <span :class="iconLarger"></span>
   </div>
 
-  <div class="column col-8">
+  <div class="column col-9">
     <transition name="fade">
       <span v-show="mouseOver" class="text-left">{{ content.name }}</span>
     </transition>

@@ -1,7 +1,7 @@
 <template>
   <table
     v-if="Array.isArray(data) && data.length > 0"
-    class="table"
+    class="table table-striped table-hover"
     :class="{ 'table-scroll': canScroll }"
   >
     <thead>
@@ -31,7 +31,11 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="(value, key1) in data" :key="key1" class="active">
+      <tr
+        @click="onClickRow($event, value.id)"
+        v-for="(value, key1) in data"
+        :key="key1"
+      >
         <td v-for="(column, key2) in columns" :key="key2">
           {{ dataValue(value, key2) }}
         </td>
@@ -102,6 +106,7 @@ export default {
   props: {
     sortBy: { type: Object, required: true },
     // search: { type: Object, required:true},
+    canAction: Boolean,
     canScroll: Boolean,
     columns: { type: Array, required: true },
     data: { type: Array },
@@ -190,7 +195,10 @@ export default {
           ) {
             // console.log(" 1 2 3 4 ... 7 || 1 ... 4 5 6 7");
             if (a <= 4 && paginate.currentPage === 3) array.push(a);
-            else if (a >= paginate.lastPage - 3 && paginate.currentPage === paginate.lastPage - 2)
+            else if (
+              a >= paginate.lastPage - 3 &&
+              paginate.currentPage === paginate.lastPage - 2
+            )
               array.push(a);
             else {
               if (!lastdot && paginate.currentPage === 3) {
@@ -291,6 +299,13 @@ export default {
       }
     };
 
+    const onClickRow = (event, key) => {
+        // console.log(event);
+      if (props.canAction) {
+        emit("clickRow", { x: event.screenX, y: event.screenY-80 }, key);
+      }
+    };
+
     const showSortIcon = (key) => {
       return props.columns[key].canSort;
     };
@@ -320,6 +335,7 @@ export default {
       dataValue,
       onClickSort,
       onClickPaginate,
+      onClickRow,
       configSortIcon,
       showSortIcon,
       columnSorted,

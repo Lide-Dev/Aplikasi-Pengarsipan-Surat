@@ -136,11 +136,14 @@ export default {
           content.showChildren = !content.showChildren;
         }
       }
-      if (props.toggle && ( (indexParent === -1 && !content.hasChildren) || (indexParent > -1) ) ) {
+      if (
+        props.toggle &&
+        ((indexParent === -1 && !content.hasChildren) || indexParent > -1)
+      ) {
         mouseOver.value = false;
         // let title = indexParent === -1 ? content.title : contents.value[indexParent].children[index].title
-        emit("SidebarContentSelected");
       }
+      emit("SidebarContentSelected");
     };
 
     return {
@@ -212,7 +215,7 @@ export default {
   padding-top: 95px;
   height: 100vh;
   width: 70px;
-  z-index: 2;
+  z-index: 6;
   overflow-y: auto;
 }
 

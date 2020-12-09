@@ -45,6 +45,8 @@
       :columns="columns"
       :data="data"
       :paginate="paginate"
+      :canAction="true"
+      @click-row="onClickRow"
       @update:sort="onSortManage"
       @update:paginate="onPaginateManage"
       @update:item-per-page="onPaginateManage"
@@ -55,8 +57,9 @@
 <script>
 import {
   computed,
+  inject,
   onMounted,
-  onUpdated,
+  provide,
   reactive,
   ref,
   toRef,
@@ -95,7 +98,6 @@ export default {
         props.title +
         (props.dyProps.page === "manageinbox" ? "Masuk" : "Keluar")
     );
-
     const tableConfig = reactive(
       initTable(true, columnsTable[props.dyProps.page])
     );
@@ -131,11 +133,20 @@ export default {
 
     const onPaginateManage = (obj) => onPaginateTable(url.value, query, obj);
 
+    const showPopup = inject("showPopoverSet");
+
+    const onClickRow = (coordinate, id) => {
+      console.log("Clicked Row");
+      showPopup(true, { coordinate, id });
+    };
+
     return {
       ...toRefs(tableConfig),
       onClickSearch,
       onSortManage,
+      onClickRow,
       onPaginateManage,
+      showPopup,
       query,
       titleModified,
     };
