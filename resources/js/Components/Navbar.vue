@@ -1,7 +1,11 @@
 <template>
   <header class="navbar bg-secondary">
     <section class="navbar-section">
-      <button class="sidebar-trigger btn" @click="toggleClicked">
+      <button
+        v-show="hasSidebar"
+        class="sidebar-trigger btn"
+        @click="toggleClicked"
+      >
         <i class="ri-menu-line ri-xl"></i>
       </button>
 
@@ -20,11 +24,14 @@
 
 <script>
 import { computed, ref } from "vue";
-import { PATH } from "../constants/path";
+import { Path } from "../constants/path";
 
 export default {
+  props: {
+    hasSidebar: { type: Boolean, default: true },
+  },
   setup(props, { emit }) {
-    const logo = ref(PATH.logo);
+    const logo = ref(Path.logo);
 
     const toggleClicked = () => {
       emit("toggleClicked");
