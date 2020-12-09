@@ -2,7 +2,10 @@
 
 namespace App\Exceptions;
 
+use GuzzleHttp\Psr7\Request;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -34,7 +37,16 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
-            //
+
+        });
+        $this->renderable(function (Throwable $e, $request) {
+            if ($e instanceof ValidationException && $request->has(['username','password'])){
+                return redirect()->route('auth')->with('loginToast', ['loginSuccess' => false, 'error' => 'credential failed!']);
+            }
+            // if ($e instanceof QueryException){
+            //     return redirect()->route('error',['error'=>'query']);
+            // }
         });
     }
+
 }
