@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ControllerException;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Lang;
 use Inertia\Inertia;
+use Illuminate\Support\Str;
 
 /**
  * Utility class support for helper home component this project.
@@ -27,12 +31,22 @@ class UtilityController extends Controller
      *
      */
     protected $defaultProps = ['dyComponent' => ['name' => 'Dashboard'], 'config' => []];
+
+    /**
+     * Using table view component at this page if value true.
+     *
+     * @var boolean
+     */
+    protected $useTable = false;
     /**
      * Props that will send at client-side
      *
      * @var array
      */
     private $responseProps = [];
+    private $dataTable = [];
+    private $configTable = [];
+
 
     /**
      * Setting name of home content component view client-side for response at props client-side.
@@ -62,8 +76,43 @@ class UtilityController extends Controller
         if (empty($config)) {
             throw new ControllerException(ControllerException::NoConfigDynamicComponent, 500);
         }
-        $this->responseProps['dyComponent']['props'] = $config;
+        if (!empty($this->responseProps['dyComponent']['props'])) {
+            $this->responseProps['dyComponent']['props'] = collect($this->responseProps['dyComponent']['props'])->merge($config)->toArray();
+        } else
+            $this->responseProps['dyComponent']['props'] = $config;
+    }
 
+    /**
+     * Set table config to props if client side has Table View component.
+     *
+     * @param array $request Handle request of sorting data and search table. Must provided query:
+     * - sortColumn => Column that was being sorted.
+     * - sortBy => 'asc'/'desc'.
+     * @param Illuminate\Pagination\LengthAwarePaginator $paginate Handle paginate data.
+     * - totalData => Total of all data that was being output.
+     * - currentPage => Current page data.
+     * - lastPage => Last page of paginate.
+     * - itemPerPage => Item per page of paginate.
+     * @return void
+     */
+    public function setTableConfig(Request $request, \Illuminate\Pagination\LengthAwarePaginator $paginate)
+    {
+        $page = ['totalData' => $paginate->total(), 'currentPage' => $paginate->currentPage(), 'lastPage' => $paginate->lastPage(), 'itemPerPage' => $paginate->perPage()];
+        $this->configTable['paginate'] = $page;
+        $this->configTable['sort'] = ['column' => $request->query('sortColumn'), 'by' => $request->query('sortBy')];
+        $this->configTable['search'] = $request->query('search');
+    }
+
+    /**
+     * Set data table to props if client side has Table View component. Automatically convert key of array data to camel case.
+     *
+     * @param array|Illuminate\Support\Collection $data
+     * @return void
+     */
+    public function setTableData($data)
+    {
+        $data = $this->camelCaseConverter($data);
+        $this->dataTable = $data;
     }
 
     /**
@@ -78,6 +127,7 @@ class UtilityController extends Controller
 
     /**
      * Send rendering component to process at Client-side. It's good at returning response.
+     * If you $useTable value true, it will share your data table at $page variable like https://inertiajs.com/shared-data#accessing-shared-data.
      *
      * @param string $component Path of component at client-side. It's from resources/js/Pages
      * @param boolean $isEmptyProps If you don't want any props on that component, just give 'True' value.
@@ -85,12 +135,47 @@ class UtilityController extends Controller
      */
     public function render(string $component, bool $isEmptyProps = false)
     {
+        if ($this->useTable && (!empty($this->dataTable) || !empty($this->configTable))) {
+            // Inertia::share('tableData', $this->dataTable);
+            // Inertia::share('tableConfig', $this->configTable);
+            $this->responseProps['dyComponent']['props']['tableData'] = $this->dataTable;
+            $this->responseProps['dyComponent']['props']['tableConfig'] = $this->configTable;
+        }
         if ($isEmptyProps) {
             return Inertia::render($component);
         } else {
             // dd($this->defaultProps);
             return Inertia::render($component, $this->configurePropsState());
         }
+    }
+
+    public function camelCaseConverter($data)
+    {
+        if (!$data instanceof \Illuminate\Support\Collection) {
+            $collection = collect($data);
+        }
+        $new = $collection->map(function ($item, $key) {
+            $arr = [];
+            foreach ($item->toArray() as $key => $value) {
+                $key = Str::camel($key);
+                $arr += [$key => $value];
+            }
+            return $arr;
+        });
+        // dd($new);
+        return $new->toArray();
+    }
+
+    public function errorHandler(Request $request, $error = 'notfound')
+    {
+        // dd($error);
+        $is_server_error = ($error === 'server' || $error === 'maintenance');
+        $message = Lang::get('errors.notfound');
+        if (in_array($error, array_keys(Lang::get('errors')))) {
+            $message = Lang::get('errors.' . $error);
+        }
+        // dd($message, in_array($error, Lang::get('errors')), Lang::get('errors'));
+        return Inertia::render('Error/Index', ['errors' => ['message' => $message, 'isServer' => $is_server_error]]);
     }
 
     protected function configurePropsState()
@@ -106,11 +191,27 @@ class UtilityController extends Controller
                 } else if (empty($dyComponent['selectedContent'])) {
                     $dyComponent['selectedContent'] = $default['dyComponent']['selectedContent'];
                 }
-               // dd($dyComponent);
+                if (!empty($dyComponent['props'])) {
+                    // dd($dyComponent['props']);
+                    $this->filterNullProps($dyComponent['props']);
+                    // dd($dyComponent['props']);
+                }
             } else {
                 $this->responseProps['dyComponent'] = $default['dyComponent'];
             }
             return $this->responseProps;
+        }
+    }
+
+    protected function filterNullProps(&$props)
+    {
+        foreach ($props as $key => $value) {
+            if (is_array($value) && $key !== "tableData") {
+                $this->filterNullProps($props[$key]);
+            }
+            if (empty($props[$key])) {
+                unset($props[$key]);
+            }
         }
     }
 }
