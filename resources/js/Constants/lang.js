@@ -7,5 +7,8 @@ export const ID_ID = {
         logoutSuccess: "Logout Berhasil!"
     },
     noNetwork: "Sepertinya terjadi masalah di bagian koneksi anda. Silahkan dicoba lagi!",
-    serverError: "Terjadi kesalahan pada server!"
+    serverError: "Terjadi kesalahan pada server!",
+    errors:{
+        contact: "Kontak ke herlandrotri@gmail.com"
+    }
 }

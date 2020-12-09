@@ -18,11 +18,11 @@ return [
     ],
     'managemailinbox' => [
         'name' => 'KelolaSurat',
-        'selected' => 20
+        'selected' => 10
     ],
     'managemailsent' => [
         'name' => 'KelolaSurat',
-        'selected' => 21
+        'selected' => 11
     ],
     'employee' => [
         'name' => 'Employee',
