@@ -17,8 +17,14 @@ const mix = require('laravel-mix');
 mix.js('resources/js/app.js', 'public/js').vue({
     extractStyles: true,
     globalStyles: false
-}).postCss('resources/css/app.css', 'public/css', []).postCss('node_modules/remixicon/fonts/remixicon.css','public/css/icon.css').postCss('node_modules/vue-toastification/dist/index.css','public/css/toast.css');
+}).postCss('resources/css/app.css', 'public/css', []).postCss('node_modules/remixicon/fonts/remixicon.css', 'public/css/icon.css').postCss('node_modules/vue-toastification/dist/index.css', 'public/css/toast.css');
 
+mix.options({
+    hmrOptions: {
+        host: 'arsiplldikti.test',
+        port: 8080
+    }
+})
 // mix.options({
 //     autoprefixer: { remove: false }
 // });
