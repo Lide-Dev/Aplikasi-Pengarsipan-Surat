@@ -593,7 +593,7 @@ dl dt {
   font-weight: bold;
 }
 dl dd {
-  margin: 0.4rem 0 0.8rem 0;
+  margin: 0.4rem 0 0.8rem;
 }
 
 html:lang(zh),
@@ -1462,7 +1462,7 @@ video.video-responsive::before {
 }
 
 .figure {
-  margin: 0 0 0.4rem 0;
+  margin: 0 0 0.4rem;
 }
 .figure .figure-caption {
   color: #66758c;
@@ -2551,7 +2551,7 @@ summary.accordion-header::-webkit-details-marker {
 }
 .pagination .page-item span {
   display: inline-block;
-  padding: 0.2rem 0.2rem;
+  padding: 0.2rem;
 }
 .pagination .page-item a {
   border-radius: 0.1rem;
@@ -2714,7 +2714,7 @@ summary.accordion-header::-webkit-details-marker {
   display: flex;
   flex-wrap: wrap;
   list-style: none;
-  margin: 0.2rem 0 0.15rem 0;
+  margin: 0.2rem 0 0.15rem;
 }
 .tab .tab-item {
   margin-top: 0;
@@ -2724,7 +2724,7 @@ summary.accordion-header::-webkit-details-marker {
   color: inherit;
   display: block;
   margin: 0 0.4rem 0 0;
-  padding: 0.4rem 0.2rem 0.3rem 0.2rem;
+  padding: 0.4rem 0.2rem 0.3rem;
   text-decoration: none;
 }
 .tab .tab-item a:focus, .tab .tab-item a:hover {
@@ -3496,6 +3496,3 @@ a.text-error:visited {
   word-break: break-word;
   word-wrap: break-word;
 }
-
-
-/*# sourceMappingURL=lldikti.css.map */
