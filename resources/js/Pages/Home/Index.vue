@@ -7,8 +7,13 @@
     :selected-content="dyComponent.selectedContent.toString()"
     class=""
   />
-  <div class="content bg-gray">
-    <component :is="dyComponent.name"></component>
+  <div class="content">
+    <component
+      :is="dyComponent.name"
+      :dy-props="dyComponent.props"
+      :title="title"
+    ></component>
+    <div @click="sidebarSelected" :class="{isolation:toggleSidebar}"></div>
   </div>
 </template>
 
@@ -22,23 +27,30 @@ import {
   computed,
   onUpdated,
 } from "vue";
-import conf from "../../constants/config";
+import { provideConfig } from "../../components/ProvideHome";
+import config from "../../constants/config";
 
 export default {
-  components: conf.componentsHome,
+  components: config.componentsHome,
   props: {
     dyComponent: {
       type: Object,
     },
+    errors: Object,
+    // tableData: Object,
+    // tableConfig: Object,
+    user: Object,
   },
   setup(props, context) {
+    // const propsDyComponent = reactive(props.dyComponent.props);
     const toggleSidebar = ref(false);
-
+    const title = computed(()=>config.componentsTitleHome[props.dyComponent.name].title);
     const toggleClicked = () => {
       toggleSidebar.value = !toggleSidebar.value;
     };
 
     const sidebarSelected = () => {
+      console.log("Emit of sidebar");
       if (toggleSidebar.value) toggleSidebar.value = false;
     };
 
@@ -46,7 +58,7 @@ export default {
       console.log("UPDATED!");
     });
 
-    return { toggleClicked, toggleSidebar, sidebarSelected };
+    return { toggleClicked, toggleSidebar, sidebarSelected, title };
   },
 };
 </script>
@@ -55,27 +67,30 @@ export default {
 .content {
   position: absolute;
   top: 65px;
-  padding-top: 10px;
-  padding-left: 65px;
-  padding-right: 15px;
+  padding-top: 20px;
+  padding-left: 75px;
+  padding-right: 20px;
   width: 100vw;
+  min-height: 98vh;
   z-index: 0;
-  overflow: hidden;
-}
-
-.isolation {
-  display: fixed;
-  opacity: 0.5;
-  background: grey;
-  z-index: 1;
-  width: 100vh;
-  height: 100vh;
   overflow: hidden;
 }
 
 @media only screen and (max-width: 840px) {
   .content {
-    padding-left: 15px;
+    padding-left: 10px;
+  }
+
+  .isolation {
+    top: 0;
+    left: -10;
+    position: fixed;
+    opacity: 0.5;
+    background: grey;
+    z-index: 1;
+    width: 110vw;
+    min-height: 100vh;
+    overflow: hidden;
   }
 }
 </style>

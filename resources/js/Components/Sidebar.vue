@@ -41,6 +41,7 @@
         v-if="content.hasChildren"
         v-show="content.showChildren"
       >
+        <div class="divider"></div>
         <div
           v-for="(children, index2) in content.children"
           :key="index2"
@@ -59,16 +60,18 @@
             ></content-sidebar>
           </inertia-link>
         </div>
+        <div class="divider"></div>
       </div>
     </div>
+    <div class="sidebar-bottom"></div>
   </div>
 </template>
 
 <script>
-import { PATH } from "../constants/path";
-import Config from "../constants/config";
-import { ref, reactive, watch } from "vue";
+import { Path } from "../constants/path";
+import { ref, reactive, watch, onMounted } from "vue";
 import ContentSidebar from "./ContentSidebar.vue";
+import config from "../constants/config";
 
 export default {
   components: {
@@ -81,57 +84,12 @@ export default {
     selectedContent: String,
   },
   setup(props, { emit }) {
+    // console.log(config.contentsHome);
     const mouseOver = ref(false);
     const selectedContent = ref(props.selectedContent);
     const reactProps = reactive(props);
-    const logo = ref(PATH.logo);
-    const contents = ref([
-      {
-        name: "Dashboard",
-        icon: "ri-dashboard-fill",
-        hasChildren: false,
-        url: "/",
-      },
-      {
-        name: "Simpan Arsip",
-        icon: "ri-inbox-archive-fill",
-        hasChildren: false,
-        url: "/archives/create",
-      },
-      {
-        name: "Kelola Surat",
-        icon: "ri-mail-settings-fill",
-        hasChildren: true,
-        showChildren: false,
-        children: [
-          {
-            name: "Surat Masuk",
-            icon: "ri-mail-download-fill",
-            url: "/archives/inbox",
-            hasChildren: false,
-          },
-          {
-            name: "Surat Keluar",
-            icon: "ri-mail-send-fill",
-            url: "/archives/sent",
-            hasChildren: false,
-          },
-        ],
-      },
-      {
-        name: "Data Pegawai",
-        icon: "ri-account-circle-fill",
-        hasChildren: false,
-        url: "/employees",
-      },
-      {
-        name: "Logout",
-        icon: "ri-logout-circle-r-fill",
-        hasChildren: false,
-        customColor: Config.bgCustom.error,
-        url: "/logout",
-      },
-    ]);
+    const logo = Path.logo;
+    const contents = ref(config.contentsHome);
 
     watch(reactProps, (newProps, prevProps) => {
       if (newProps.toggle) {
@@ -150,7 +108,7 @@ export default {
       } else {
         icon += "btn-primary";
       }
-      if (indexParent.toString() ==="-1") {
+      if (indexParent.toString() === "-1") {
         return index.toString() === selectedContent.value
           ? icon + " active"
           : icon;
@@ -166,14 +124,21 @@ export default {
       else mouseOver.value = true;
     };
     const sidebarClicked = (index, indexParent = -1) => {
+      console.log(
+        "Sidebar Clicked at index: ",
+        index,
+        " and indexParent: ",
+        indexParent
+      );
+      let content = contents.value[index];
       if (indexParent === -1) {
-        let content = contents.value[index];
         if (content.hasChildren) {
           content.showChildren = !content.showChildren;
         }
       }
-      if (props.toggle) {
+      if (props.toggle && ( (indexParent === -1 && !content.hasChildren) || (indexParent > -1) ) ) {
         mouseOver.value = false;
+        // let title = indexParent === -1 ? content.title : contents.value[indexParent].children[index].title
         emit("SidebarContentSelected");
       }
     };
@@ -205,6 +170,12 @@ export default {
 
 .children-content {
   width: 100%;
+  /* border-bottom: 2px #eef0f4 solid; */
+  /* border-top: 2px #eef0f4 solid; */
+}
+
+.divider {
+  margin: 5px 15px;
 }
 
 .btn {
@@ -219,6 +190,19 @@ export default {
   text-decoration: none;
 }
 
+.sidebar-bottom {
+  position: sticky;
+  height: 10%;
+  width: 100%;
+  background-image: linear-gradient(
+    to bottom,
+    rgba(24, 76, 143, 0),
+    rgba(24, 76, 143, 1) 80%
+  );
+  pointer-events: none;
+  bottom: 0;
+}
+
 .sidebar-container {
   position: fixed;
   transition-property: width;
@@ -226,7 +210,7 @@ export default {
   transition-duration: 300ms;
   top: 0;
   padding-top: 95px;
-  height: 110vh;
+  height: 100vh;
   width: 70px;
   z-index: 2;
   overflow-y: auto;
@@ -291,6 +275,7 @@ export default {
   .sidebar-container {
     left: -260px;
     width: 260px;
+    height: 102%;
     /* overflow-y: scroll; */
   }
 }

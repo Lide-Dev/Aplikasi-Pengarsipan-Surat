@@ -73,7 +73,7 @@
 
 <script>
 import { ref, reactive, computed, toRefs, watch, watchEffect } from "vue";
-import { PATH } from "../../constants/path";
+import { Path } from "../../constants/path";
 import { useToast } from "vue-toastification";
 import { ID_ID } from "../../Constants/lang";
 
@@ -92,9 +92,9 @@ export default {
     // console.log(props);
     const propsEffect = reactive(props);
     const toast = useToast();
-    const logo = ref(PATH.logo);
+    const logo = ref(Path.logo);
     const inputs = reactive({
-      username: "jenifer.schuster",
+      username: "collins.dion",
       password: "password",
       remember: false,
     });
