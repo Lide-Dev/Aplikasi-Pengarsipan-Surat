@@ -1,10 +1,11 @@
 require('./bootstrap');
 
-import { createApp, h } from 'vue'
+import { createApp, h, readonly } from 'vue'
 import { App, plugin } from '@inertiajs/inertia-vue3'
 import Toast, { useToast } from "vue-toastification";
 import "vue-toastification/dist/index.css";
 import { ID_ID } from './Constants/lang';
+import { InertiaProgress } from '@inertiajs/progress'
 
 const el = document.getElementById('app')
 const optionsToast = {
@@ -41,7 +42,7 @@ const optionsToast = {
 }());
 
 
-createApp({
+const app = createApp({
     render: () => h(App, {
         initialPage: JSON.parse(el.dataset.page),
         resolveComponent: name => require(`./Pages/${name}`).default,
@@ -50,7 +51,26 @@ createApp({
             return { ...props }
         }
     })
-}).use(plugin).use(Toast, optionsToast).mount(el)
+})
+app.provide('Lang', readonly(ID_ID))
+app.use(plugin)
+app.use(Toast, optionsToast)
+app.mount(el)
+
+InertiaProgress.init({
+    // The delay after which the progress bar will
+    // appear during navigation, in milliseconds.
+    delay: 250,
+
+    // The color of the progress bar.
+    color: '#29d',
+
+    // Whether to include the default NProgress styles.
+    includeCSS: true,
+
+    // Whether the NProgress spinner will be shown.
+    showSpinner: false,
+})
 
 /**
  * Control a toast by flash session at server-side.
