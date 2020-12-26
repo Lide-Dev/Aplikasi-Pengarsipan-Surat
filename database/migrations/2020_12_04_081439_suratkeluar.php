@@ -21,7 +21,7 @@ class Suratkeluar extends Migration
             $table->string('no_surat', 150);
             $table->string('tujuan', 255);
             $table->string('perihal', 255);
-            $table->string('tembusan', 255);
+            // $table->string('tembusan', 500);
             $table->string('alamat', 255)->nullable();
             $table->string('isi_ringkas', 500)->nullable();
             $table->softDeletes();

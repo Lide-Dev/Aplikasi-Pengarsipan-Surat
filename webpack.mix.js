@@ -25,6 +25,17 @@ mix.options({
         port: 8080
     }
 })
+
+mix.webpackConfig({
+    resolve: {
+        extensions: ['.js', '.vue', '.json'],
+        alias: {
+            // 'vue$': 'vue/dist/vue.esm.js',
+            '@@': __dirname + '/resources/js'
+        },
+    },
+})
+
 // mix.options({
 //     autoprefixer: { remove: false }
 // });

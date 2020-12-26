@@ -13,6 +13,7 @@ class SuratKeluar extends Model
 
     protected $table = 'suratkeluar';
     protected $guarded = [
+        'id',
         'created_at',
         'updated_at',
         'deleted_at',

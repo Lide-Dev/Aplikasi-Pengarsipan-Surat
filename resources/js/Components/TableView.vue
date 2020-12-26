@@ -1,49 +1,62 @@
 <template>
-  <table
-    v-if="Array.isArray(data) && data.length > 0"
-    class="table table-striped table-hover"
-    :class="{ 'table-scroll': canScroll }"
-  >
-    <thead>
-      <tr>
-        <th
-          @click="onClickSort(key)"
-          class="text-center"
-          :class="{ sortable: showSortIcon(key) }"
-          v-for="(column, key) in columns"
-          :key="key"
-        >
-          <!-- v-show="showSortIcon(column, key)" -->
-          <div class="centered-th">
-            <div v-show="showSortIcon(key)" class="d-inline-block mr-2">
-              <i
-                class="ri-arrow-drop-up-fill ri-sm d-block"
-                :class="{ 'text-gray': !configSortIcon(key).asc }"
-              ></i>
-              <i
-                class="ri-arrow-drop-down-fill ri-sm d-block"
-                :class="{ 'text-gray': !configSortIcon(key).desc }"
-              ></i>
-            </div>
-            <div class="d-inline-block">{{ column.name }}</div>
-          </div>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        @click="onClickRow($event, value.id)"
-        v-for="(value, key1) in data"
-        :key="key1"
-      >
-        <td v-for="(column, key2) in columns" :key="key2">
-          {{ dataValue(value, key2) }}
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <p v-else>Data yang anda minta kosong.</p>
+  <div class="table-container">
+    <div
+      v-if="tableScrollIndicator('right')"
+      class="scroll-indicator scroll-indicator-right"
+    ></div>
+    <div
+      v-if="tableScrollIndicator('left')"
+      class="scroll-indicator scroll-indicator-left"
+    ></div>
 
+    <table
+      v-if="Array.isArray(data) && data.length > 0"
+      class="table table-hover"
+      :class="{ 'table-scroll': canScrollTable }"
+      @scroll="onScrollTable($event)"
+    >
+      <thead>
+        <tr>
+          <th
+            @click="onClickSort(column)"
+            class="tooltip text-center"
+            :class="{ sortable: showSortIcon(column.id) }"
+            v-for="column in columns"
+            :key="column.id"
+            data-tooltip="Menyortir"
+          >
+            <!-- v-show="showSortIcon(column, key)" -->
+            <div class="centered-th">
+              <div v-show="showSortIcon(column.id)" class="d-inline-block mr-2">
+                <i
+                  class="ri-arrow-drop-up-fill ri-sm d-block"
+                  :class="{ 'text-gray': !configSortIcon(column.id).asc }"
+                ></i>
+                <i
+                  class="ri-arrow-drop-down-fill ri-sm d-block"
+                  :class="{ 'text-gray': !configSortIcon(column.id).desc }"
+                ></i>
+              </div>
+              <div class="d-inline-block">{{ column.name }}</div>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          @click="onClickRow($event, value.id)"
+          :class="{ 'selected-row': selectedRowClass(value.id) }"
+          v-for="value in data"
+          :key="value.id"
+        >
+          <td v-for="column in columns" :key="column.id">
+            {{ dataValue(value, column) }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p v-else>Data yang anda minta kosong.</p>
+  </div>
   <div
     class="columns pagination-container"
     v-if="Array.isArray(data) && data.length > 0"
@@ -60,8 +73,8 @@
           <span v-else><i class="ri-arrow-left-circle-fill"></i></span>
         </li>
         <li
-          v-for="(value, key) in arrayPages"
-          :key="keyPaginate(value, key)"
+          v-for="value in arrayPages"
+          :key="keyPaginate(value)"
           class="page-item"
           :class="{ active: paginate.currentPage == value }"
         >
@@ -102,10 +115,11 @@
 import { computed, reactive, ref, watch } from "vue";
 import { Inertia } from "@inertiajs/inertia";
 import { PATH } from "../constants/path";
+import UseBreakpoint from "./UseBreakpoint";
+import _ from "lodash";
+
 export default {
   props: {
-    sortBy: { type: Object, required: true },
-    // search: { type: Object, required:true},
     canAction: Boolean,
     canScroll: Boolean,
     columns: { type: Array, required: true },
@@ -114,18 +128,17 @@ export default {
       type: Object,
       default: { totalData: 0, currentPage: 1, lastPage: 1, itemPerPage: 15 },
     },
+    popoverState: { type: Boolean, required: true },
+    sortBy: { type: Object, required: true },
   },
+  emits: ["updateItemPerPage", "updateSort", "updatePaginate", "clickRow"],
   setup(props, { emit }) {
     /*--------------------------------------------------------------
         START: Initial Variable
       --------------------------------------------------------------*/
-    const itemPerPage = computed({
-      get: () => props.paginate.itemPerPage,
-      set: (val) => {
-        console.log(val);
-        return emit("update:itemPerPage", { itemPerPage: val });
-      },
-    });
+
+    const selectedRowId = ref(0);
+
     const columnSorted = reactive({
       index: defaultSort(props),
       by:
@@ -133,6 +146,8 @@ export default {
           ? props.sortBy.by
           : "none",
     });
+
+    const tableScrollState = reactive({ value: 0, max: 1 });
 
     const arrayPages = computed(() => {
       let paginate = props.paginate;
@@ -230,6 +245,27 @@ export default {
       return array;
     });
 
+    const canScrollTable = computed(() => {
+      if (props.canScroll) {
+        return props.canScroll;
+      } else {
+        let type = UseBreakpoint().type;
+        return type.value === "xs";
+      }
+    });
+
+    const itemPerPage = computed({
+      get: () => props.paginate.itemPerPage,
+      set: (val) => {
+        return emit("updateItemPerPage", { itemPerPage: val });
+      },
+    });
+
+    const selectedRowClass = (key) => {
+      // console.log()
+      return props.popoverState && selectedRowId.value === key;
+    };
+
     /*--------------------------------------------------------------
         END: Initial Variable
       --------------------------------------------------------------*/
@@ -256,11 +292,28 @@ export default {
       }
     };
 
-    const onClickSort = (key) => {
-      if (!props.columns[key].canSort) {
+    const dataValue = (value, column) => {
+      let columnKey = column.column;
+      if (columnKey in value) {
+        return value[columnKey];
+      } else {
+        return "-";
+      }
+    };
+
+    const keyPaginate = (value) => {
+      if (value == "...") {
+        return _.uniqueId();
+      } else {
+        return value;
+      }
+    };
+
+    const onClickSort = (column) => {
+      if (!column.canSort) {
         return;
       }
-      if (columnSorted.index == key) {
+      if (columnSorted.index == column.id) {
         switch (columnSorted.by) {
           case "none":
             columnSorted.by = "asc";
@@ -275,22 +328,25 @@ export default {
         }
       } else {
         columnSorted.by = "asc";
-        columnSorted.index = key;
+        columnSorted.index = column.id;
       }
       if (columnSorted.by != "none")
-        emit("update:sort", {
-          sortColumn: props.columns[key].column,
+        emit("updateSort", {
+          sortColumn: column.column,
           sortBy: columnSorted.by,
         });
-      else emit("update:sort", { sortColumn: "", sortBy: "" });
+      else emit("updateSort", { sortColumn: "", sortBy: "" });
     };
 
     const onClickPaginate = (key) => {
+      if (key != "..." && typeof key === "string") {
+        return;
+      }
       if (key != "..." && key >= 1 && key <= props.paginate.lastPage) {
-        emit("update:paginate", { currentPage: key });
+        emit("updatePaginate", { currentPage: key });
       }
       if (key === "next" || key === "prev") {
-        emit("update:paginate", {
+        emit("updatePaginate", {
           currentPage:
             key === "next"
               ? props.paginate.currentPage + 1
@@ -300,9 +356,17 @@ export default {
     };
 
     const onClickRow = (event, key) => {
-        // console.log(event);
       if (props.canAction) {
-        emit("clickRow", { x: event.screenX, y: event.screenY-80 }, key);
+        selectedRowId.value = key;
+        emit("clickRow", { x: event.clientX, y: event.clientY }, key);
+      }
+    };
+
+    const onScrollTable = (event) => {
+      if (canScrollTable.value) {
+        tableScrollState.value = event.target.scrollLeft;
+        tableScrollState.max =
+          event.target.scrollWidth - event.target.clientWidth;
       }
     };
 
@@ -310,20 +374,12 @@ export default {
       return props.columns[key].canSort;
     };
 
-    const dataValue = (value, keyColumn) => {
-      let columnKey = props.columns[keyColumn].column;
-      if (columnKey in value) {
-        return value[columnKey];
+    const tableScrollIndicator = (value) => {
+      //   console.log(tableScrollState.value, tableScrollState.max);
+      if (value === "right") {
+        return tableScrollState.value < tableScrollState.max;
       } else {
-        return "-";
-      }
-    };
-
-    const keyPaginate = (value, key) => {
-      if (value == "...") {
-        return "empty".key;
-      } else {
-        return value;
+        return tableScrollState.value > 0;
       }
     };
 
@@ -332,16 +388,22 @@ export default {
       --------------------------------------------------------------*/
 
     return {
+      arrayPages,
+      canScrollTable,
+      columnSorted,
+      configSortIcon,
       dataValue,
-      onClickSort,
+      itemPerPage,
+      keyPaginate,
       onClickPaginate,
       onClickRow,
-      configSortIcon,
+      onClickSort,
+      onScrollTable,
+      tableScrollState,
+      tableScrollIndicator,
+      selectedRowClass,
+      selectedRowId,
       showSortIcon,
-      columnSorted,
-      arrayPages,
-      keyPaginate,
-      itemPerPage,
     };
   },
 };
@@ -370,44 +432,6 @@ const defaultSort = (props) => {
 /*--------------------------------------------------------------
     END: Function Helper
 ----------------------------------------------------------------*/
-// if (paginate.lastPage >= 6) {
-//   if (paginate.currentPage > 0 && paginate.currentPage <= 2) {
-//     return [1, 2, 3, "...", paginate.lastPage];
-//   }
-//   if (paginate.currentPage == 3) {
-//     return [1, 2, 3, 4, "...", paginate.lastPage];
-//   }
-//   if (
-//     paginate.currentPage > 3 &&
-//     paginate.currentPage < paginate.lastPage - 3
-//   ) {
-//     return [
-//       1,
-//       "...",
-//       paginate.currentPage - 1,
-//       paginate.currentPage,
-//       paginate.currentPage + 1,
-//       "...",
-//       paginate.lastPage,
-//     ];
-//   }
-//   if (paginate.currentPage == paginate.lastPage - 3) {
-//     return [
-//       1,
-//       "...",
-//       paginate.currentPage - 1,
-//       paginate.currentPage,
-//       paginate.currentPage + 1,
-//       paginate.lastPage,
-//     ];
-//   }
-//   if (
-//     paginate.currentPage < paginate.lastPage + 1 &&
-//     paginate.currentPage <= paginate.lastPage - 2
-//   ) {
-//     return [1, 2, 3, "...", paginate.lastPage];
-//   }
-// }
 </script>
 
 <style scoped>
@@ -436,15 +460,35 @@ const defaultSort = (props) => {
   pointer-events: none;
 }
 
+.table-container {
+  position: relative;
+}
+
 .table tbody tr td {
   border-left: 1px #dadee4 solid;
   border-right: 1px #dadee4 solid;
   padding-right: 15px;
   padding-left: 15px;
 }
+
+.table tbody tr {
+  cursor: pointer;
+}
+
 .table thead tr {
   border: 1px #dadee4 solid;
 }
+
+.table tbody tr:hover {
+  color: #fff;
+  background-color: #184c8f;
+}
+
+.selected-row {
+  -webkit-box-shadow: 0px 11px 14px 0px rgba(0, 0, 0, 0.3);
+  box-shadow: 0px 11px 14px 0px rgba(0, 0, 0, 0.3);
+}
+
 .sortable {
   cursor: pointer;
 }
@@ -452,5 +496,35 @@ const defaultSort = (props) => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.scroll-indicator {
+  pointer-events: none;
+}
+
+@media only screen and (max-width: 840px) {
+  .scroll-indicator-left {
+    position: absolute;
+    width: 10%;
+    height: 100%;
+    left: -10;
+    z-index: 5;
+    background-image: linear-gradient(
+      to left,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 1) 50%
+    );
+  }
+  .scroll-indicator-right {
+    position: absolute;
+    width: 10%;
+    height: 100%;
+    right: -10;
+    z-index: 5;
+    background-image: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 1) 50%
+    );
+  }
 }
 </style>

@@ -1,23 +1,16 @@
 <template>
   <div class="container">
-    <div class="columns">
-      <div class="column col-auto">
-        <h4>{{ titleModified }}</h4>
-      </div>
+    <title-bar :title="title" :reusable-name-page="dyProps.page">
       <div class="column col-auto col-ml-auto">
-        <button
-          class="btn btn-success text-light tooltip tooltip-left show-md"
-          data-tooltip="Buat Surat"
+        <inertia-link
+          :href="url + '/create'"
+          class="btn btn-success text-light float-right"
         >
-          <i class="ri-mail-add-fill ri-1x"></i>
-        </button>
-        <button class="btn btn-success text-light float-right hide-md">
-          <i class="ri-mail-add-fill mr-2"></i>
-          <span class="hide-md">Buat Surat</span>
-        </button>
+          <i class="ri-mail-add-fill"></i>
+          <span class="ml-2 hide-md">Buat Surat</span>
+        </inertia-link>
       </div>
-    </div>
-    <div class="divider"></div>
+    </title-bar>
     <label class="form-label" for="searchID">Pencarian</label>
     <div class="columns search-box">
       <div class="column col-8">
@@ -45,11 +38,12 @@
       :columns="columns"
       :data="data"
       :paginate="paginate"
+      :popoverState="popoverState"
       :canAction="true"
-      @click-row="onClickRow"
-      @update:sort="onSortManage"
-      @update:paginate="onPaginateManage"
-      @update:item-per-page="onPaginateManage"
+      @click-row="onClickRowManageMail"
+      @update-sort="onSortManage"
+      @update-paginate="onPaginateManage"
+      @update-item-per-page="onPaginateManage"
     ></table-view>
   </div>
 </template>
@@ -80,9 +74,10 @@ import {
 import { Inertia } from "@inertiajs/inertia";
 import config from "../../constants/config";
 import { Path } from "../../constants/path";
+import TitleBar from "../../Components/TitleBar"
 
 export default {
-  components: { TableView },
+  components: { TableView, TitleBar },
   props: {
     title: String,
     dyProps: {
@@ -91,13 +86,13 @@ export default {
     },
   },
   setup(props) {
-    const url = ref(Path.contentsHome[props.dyProps.page].index);
+    const url = computed(() => {
+      //   console.log("URL", Path.contentsHome[props.dyProps.page]);
+      return Path.contentsHome[props.dyProps.page].index;
+    });
+
     const page = ref(props.dyProps.page);
-    const titleModified = computed(
-      () =>
-        props.title +
-        (props.dyProps.page === "manageinbox" ? "Masuk" : "Keluar")
-    );
+
     const tableConfig = reactive(
       initTable(true, columnsTable[props.dyProps.page])
     );
@@ -117,7 +112,7 @@ export default {
           props.dyProps.page
         );
         page.value = newProps.dyProps.page;
-        url.value = Path.contentsHome[props.dyProps.page].index;
+        // url.value = Path.contentsHome[props.dyProps.page].index;
         tableConfig.columns = columnsTable[page.value];
         console.log(tableConfig.columns);
       }
@@ -133,22 +128,47 @@ export default {
 
     const onPaginateManage = (obj) => onPaginateTable(url.value, query, obj);
 
-    const showPopup = inject("showPopoverSet");
+    const setPopoverCoordinate = inject("setPopoverCoordinate");
+    const setPopoverState = inject("setPopoverState");
+    const popoverState = inject("getPopoverState");
 
-    const onClickRow = (coordinate, id) => {
-      console.log("Clicked Row");
-      showPopup(true, { coordinate, id });
+    const onClickRowManageMail = (coordinate, id) => {
+      let content = [
+        {
+          id: 0,
+          name: "Lihat Surat",
+          icon: "ri-mail-open-fill",
+          callback: () => {
+            console.log("Lihat Surat Clicked" + id);
+          },
+        },
+        {
+          id: 1,
+          name: "Hapus Surat",
+          icon: "ri-delete-bin-2-fill",
+          callback: () => {
+            console.log("Hapus Surat Clicked" + id);
+          },
+        },
+      ];
+      //   console.log("Clicked Row");
+      setPopoverState(true);
+      setPopoverState(content);
+      setPopoverCoordinate(coordinate);
+      console.log("Clicked Row", popoverState.value);
     };
 
     return {
+      url,
       ...toRefs(tableConfig),
       onClickSearch,
       onSortManage,
-      onClickRow,
+      onClickRowManageMail,
       onPaginateManage,
-      showPopup,
       query,
-      titleModified,
+      popoverState,
+      setPopoverState,
+      setPopoverCoordinate,
     };
   },
 };

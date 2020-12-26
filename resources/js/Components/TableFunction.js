@@ -2,14 +2,14 @@ import { Inertia } from "@inertiajs/inertia";
 
 export const columnsTable = {
     manageinbox: [
-        { name: "Tanggal Surat", column: "tanggalSurat", canSort: true },
-        { name: "Asal Surat", column: "asalSurat", canSort: true },
-        { name: "No. Surat", column: "noSurat", canSort: true },
+        { id: 0, name: "Tanggal Surat", column: "tanggalSurat", canSort: true },
+        { id: 1, name: "Asal Surat", column: "asalSurat", canSort: true },
+        { id: 2, name: "No. Surat", column: "noSurat", canSort: true },
     ],
     managesent: [
-        { name: "Tanggal Surat", column: "tanggalSurat", canSort: true },
-        { name: "Tujuan Surat", column: "tujuan", canSort: true },
-        { name: "No. Surat", column: "noSurat", canSort: true },
+        { id: 0, name: "Tanggal Surat", column: "tanggalSurat", canSort: true },
+        { id: 1, name: "Tujuan Surat", column: "tujuan", canSort: true },
+        { id: 2, name: "No. Surat", column: "noSurat", canSort: true },
     ]
 }
 
@@ -33,13 +33,18 @@ export function initTable(isConfig = true, columns = []) {
                 lastPage: 1,
                 itemPerPage: 15,
             },
+            filter: [{
+                name: '',
+                alias: '',
+                options: {},
+            }],
             data: [],
             columns: columns, // { name: "Test", column: "tanggalSurat", canSort: true },
         }
     }
     else {
         return {
-            sortColumn: "", sortBy: "", search: "",
+            sortColumn: "", sortBy: "", search: "", filter: {},
             currentPage: 1,
             itemPerPage: 15,
         }
@@ -183,9 +188,12 @@ function getTableData(path, query) {
     if (query.search !== "") {
         a.search = query.search;
     }
+    a.tableOnly = true;
     a.page = query.currentPage;
     a.itemPerPage = query.itemPerPage;
     Inertia.get(path, a, {
         preserveState: true,
     });
 }
+
+

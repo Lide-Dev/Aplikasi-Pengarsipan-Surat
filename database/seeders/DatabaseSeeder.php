@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             SifatSuratSeeder::class,
             SuratKeluarSeeder::class,
             SuratMasukSeeder::class,
+            TembusanSeeder::class,
         ]);
     }
 }

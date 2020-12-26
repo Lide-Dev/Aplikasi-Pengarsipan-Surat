@@ -16,7 +16,7 @@ class ManageMailController extends UtilityController
         $this->defaultProps = ['dyComponent' => ['name' => config('contentenum.managemailinbox.name')]];
     }
 
-    public function indexInbox(Request $request)
+    public function inboxIndex(Request $request)
     {
         $this->defaultColumn = ['id', 'tanggal_surat', 'asal_surat', 'no_surat'];
         $this->setDynamicComponent(config('contentenum.managemailinbox.name'), config('contentenum.managemailinbox.selected'));
@@ -25,7 +25,7 @@ class ManageMailController extends UtilityController
 
         return $this->render('Home/Index');
     }
-    public function indexSent(Request $request)
+    public function sentIndex(Request $request)
     {
         $this->defaultColumn = ['id', 'tanggal_surat', 'tujuan', 'no_surat'];
         $this->setDynamicComponent(config('contentenum.managemailsent.name'), config('contentenum.managemailsent.selected'));
@@ -41,10 +41,8 @@ class ManageMailController extends UtilityController
             $mail = SuratMasuk::select($this->defaultColumn);
         else
             $mail = SuratKeluar::select($this->defaultColumn);
-        // dd( $mail->configTable($request)->paginate(19)->items() );
         $mail = $mail->configTable($request)->paginate(intval($request->query('itemPerPage', 15)));
         $this->setTableConfig($request, $mail);
-       // dd($mail->items());
         $this->setTableData($mail->items());
     }
 }

@@ -30,6 +30,7 @@ export default {
   props: {
     hasSidebar: { type: Boolean, default: true },
   },
+  emits:["toggleClicked"],
   setup(props, { emit }) {
     const logo = ref(Path.logo);
 

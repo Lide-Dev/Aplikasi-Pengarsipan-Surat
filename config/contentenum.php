@@ -12,9 +12,13 @@ return [
         'name' => 'Dashboard',
         'selected' => 0
     ],
-    'savemail' => [
-        'name' => 'SimpanSurat',
-        'selected' => 1
+    'savemailinbox' => [
+        'name' => 'BuatSurat',
+        'selected' => 10
+    ],
+    'savemailsent' => [
+        'name' => 'BuatSurat',
+        'selected' => 11
     ],
     'managemailinbox' => [
         'name' => 'KelolaSurat',

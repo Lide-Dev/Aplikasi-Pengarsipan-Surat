@@ -3,7 +3,7 @@
     <div class="column col-7 col-md-12 first centered bg-white">
       <div class="columns centered col-gapless height-100">
         <div class="column col-md-4 show-md">
-          <img :src="logo" alt="Logo LLDIKTI" />
+          <img class="logo" :src="logo" alt="Logo LLDIKTI" />
         </div>
         <div class="column col-md-8 show-md">
           <h5 class="text-small text-primary col-8">
@@ -14,7 +14,7 @@
       <div class="columns hide-md">
         <div class="column col-md-11 col-12">
           <figure>
-            <img :src="logo" alt="Logo LLDIKTI" />
+            <img class="logo" :src="logo" alt="Logo LLDIKTI" />
           </figure>
         </div>
         <div class="column col-md-1 col-12 centered">
@@ -72,54 +72,45 @@
 </template>
 
 <script>
-import { ref, reactive, computed, toRefs, watch, watchEffect } from "vue";
+import { ref, reactive, toRefs } from "vue";
 import { Path } from "../../constants/path";
-import { useToast } from "vue-toastification";
-import { ID_ID } from "../../Constants/lang";
+import { Inertia } from "@inertiajs/inertia";
 
 export default {
   props: {
-    success: {
-      type: Boolean,
-    },
-    error: {
-      type: String,
-    },
     sessionExpired: Boolean,
     logout: Boolean,
+    toast: String,
   },
   setup(props) {
     // console.log(props);
-    const propsEffect = reactive(props);
-    const toast = useToast();
+
     const logo = ref(Path.logo);
     const inputs = reactive({
       username: "collins.dion",
       password: "password",
       remember: false,
     });
-    const success = ref(props.success);
-    const error = ref(props.error);
     const processXhr = ref(false);
-    watch(props, (newProps, prevProps) => {
-      success.value = newProps.success;
-    });
+    function login() {
+      let param = { username: this.username, password: this.password };
+      Inertia.post("/login", param, {
+        onStart: () => {
+          processXhr.value = true;
+        },
+        onFinish: () => {
+          processXhr.value = false;
+        },
+      });
+      //   if (this.success) {
+      //     this.$inertia.visit("/home", { replace: true });
+      //   }
+      //   console.log(this.$page);
+    }
 
     // const messages = reactive({ success: props.success, error: props.error });
 
-    return { ...toRefs(inputs), success, error, logo, toast, processXhr };
-  },
-  methods: {
-    async login() {
-      this.processXhr = true;
-      let param = { username: this.username, password: this.password };
-      await this.$inertia.post("/login", param);
-      this.processXhr = false;
-      if (this.success) {
-        this.$inertia.visit("/home", { replace: true });
-      }
-      console.log(this.$page);
-    },
+    return { ...toRefs(inputs), logo, processXhr, login };
   },
 };
 </script>
@@ -145,7 +136,7 @@ export default {
   align-items: center;
 }
 
-img {
+.logo {
   display: block;
   margin-left: auto;
   margin-right: auto;
@@ -165,7 +156,7 @@ img {
     height: 30vh;
   }
 
-  img {
+  .logo {
     display: block;
     margin-left: auto;
     margin-right: auto;
@@ -188,7 +179,7 @@ img {
 }
 
 @media only screen and (max-width: 660px) {
-  img {
+  .logo {
     display: block;
     margin-left: auto;
     margin-right: auto;

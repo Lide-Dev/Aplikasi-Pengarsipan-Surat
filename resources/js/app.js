@@ -1,16 +1,18 @@
 require('./bootstrap');
 
-import { createApp, h, readonly } from 'vue'
+import { createApp, h } from 'vue'
 import { App, plugin } from '@inertiajs/inertia-vue3'
 import Toast, { useToast } from "vue-toastification";
-import "vue-toastification/dist/index.css";
+// import "vue-toastification/dist/index.css";
 import { ID_ID } from './Constants/lang';
 import { InertiaProgress } from '@inertiajs/progress'
+import { Settings } from 'luxon';
+// import Config from '@@/Constants/config';
 
 const el = document.getElementById('app')
 const optionsToast = {
     position: "top-right",
-    timeout: 3500,
+    timeout: 5000,
     closeOnClick: true,
     pauseOnFocusLoss: false,
     pauseOnHover: false,
@@ -19,6 +21,11 @@ const optionsToast = {
     showCloseButtonOnHover: false,
     closeButton: "button",
 };
+
+Settings.defaultZoneName = "Asia/Jakarta";
+Settings.defaultLocale = "id";
+// DateTime.local().toLocaleString(DateTime.DATE_SHORT)
+// console.log(DateTime.local()<DateTime.local().endOf('year'));
 
 /**
  * This is for Chrome Android Browser support. The navbar if hide, it will make kinda bad viewport. So we need configure at Javascript.
@@ -41,7 +48,6 @@ const optionsToast = {
     size();
 }());
 
-
 const app = createApp({
     render: () => h(App, {
         initialPage: JSON.parse(el.dataset.page),
@@ -52,7 +58,24 @@ const app = createApp({
         }
     })
 })
-app.provide('lang', readonly(ID_ID))
+/**
+ * https://stackoverflow.com/questions/63869859/detect-click-outside-element-on-vue-3
+ */
+app.directive('closable', {
+    beforeMount(el, binding) {
+        el.clickOutsideEvent = function (event) {
+            if (!(el === event.target || el.contains(event.target))) {
+                binding.value(event, el);
+            }
+        };
+        document.body.addEventListener('click', el.clickOutsideEvent);
+    },
+    unmounted(el) {
+        document.body.removeEventListener('click', el.clickOutsideEvent);
+    }
+});
+app.provide('lang', "id")
+app.provide('optionsToast', optionsToast)
 app.use(plugin)
 app.use(Toast, optionsToast)
 app.mount(el)
@@ -72,23 +95,21 @@ InertiaProgress.init({
     showSpinner: false,
 })
 
+const popToast = (state = "info" || "error" || "success" || "warning", message = "") => {
+    useToast()[state](message, optionsToast);
+}
 /**
  * Control a toast by flash session at server-side.
  * @param {*} props
  */
 const globalToastManagement = (props) => {
-    if (props.authToast) {
-        let status = props.authToast;
-        if (status.logout) {
-            useToast().info(ID_ID.authentication.logoutSuccess, optionsToast);
-        }
-        if (status.sessionExpired) {
-            useToast().error(ID_ID.authentication.sessionExpired, optionsToast);
-        }
-    }
-    if (props.loginToast) {
-        let status = props.loginToast;
-        if (status.loginSuccess) useToast().success(ID_ID.authentication.loginSuccess, optionsToast); else
-            useToast().error(ID_ID.authentication.loginFailed, optionsToast);
-    }
+    let toast = props.toast
+    if (toast === "login.expire") popToast("error", ID_ID.authentication.sessionExpired)
+    if (toast === "login.failed") popToast("error", ID_ID.authentication.loginFailed)
+    if (toast === "login.success") popToast("success", ID_ID.authentication.loginSuccess)
+    if (toast === "logout") popToast("success", ID_ID.authentication.logoutSuccess)
+    if (toast === "create.inbox.mail.error" || toast === "create.sent.mail.error") popToast("error", ID_ID.form.invalid)
+    if (toast === "create.inbox.document.error" || toast === "create.sent.document.error") popToast("error", ID_ID.form.documentInvalid)
+    if (toast === "create.inbox.tembusan.error" || toast === "create.sent.tembusan.error") popToast("error", ID_ID.form.documentInvalid)
+    props.toast = "";
 }

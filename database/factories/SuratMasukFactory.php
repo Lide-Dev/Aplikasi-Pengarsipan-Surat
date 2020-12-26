@@ -28,7 +28,7 @@ class SuratMasukFactory extends Factory
             'no_surat'=> $this->faker->numerify('###/###/###'),
             'asal_surat'=> $this->faker->company,
             'perihal'=> $this->faker->sentences(1, true),
-            'tembusan'=> $this->faker->sentences(1, true),
+            // 'tembusan'=> $this->faker->sentences(1, true),
             'isi_ringkas' => $this->faker->sentences(3, true),
         ];
     }

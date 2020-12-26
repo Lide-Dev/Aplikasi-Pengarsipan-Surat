@@ -15,14 +15,14 @@ class LoginController extends Controller
 
     public function authenticate(Request $request)
     {
-        $credentials = $request->validate(['username'=>'required|min:3','password'=>'required|min:8']);
+        $credentials = $request->validateWithBag("login.failed",['username'=>'required|min:3','password'=>'required|min:8']);
 // dd($credentials);
         // $credentials = $request->only('username', 'password');
 
         if (Auth::attempt($credentials)) {
-            return redirect()->route('home')->with('loginToast', ['loginSuccess' => true]);
+            return redirect()->route('home')->with('toast', "login.success");
         } else {
-            return redirect()->route('auth')->with('loginToast', ['loginSuccess' => false, 'error' => 'credential failed!']);
+            return redirect()->route('auth')->with('toast', "login.failed");
         }
     }
 
@@ -30,10 +30,10 @@ class LoginController extends Controller
     {
         //dd(Auth::user());
         if (empty(Auth::user()))
-            return redirect()->route('auth')->with('authToast', ['sessionExpired' => true]);
+            return redirect()->route('auth')->with('toast', "login.expire");
         else {
             Auth::logout();
-            return redirect()->route('auth')->with('authToast', ['logout' => true]);
+            return redirect()->route('auth')->with('toast', "logout");
         }
     }
 }

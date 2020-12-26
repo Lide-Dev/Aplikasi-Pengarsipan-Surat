@@ -14,14 +14,33 @@
     </div>
     <div
       class="sidebar-content-outer"
-      v-for="(content, index) in contents"
-      :key="index"
+      v-for="content in contents"
+      :key="content.id"
     >
-      <div @click="sidebarClicked(index)" :class="contentActive(index)">
+      <div
+        @click="sidebarClicked(content.id)"
+        :class="contentActive(content.id)"
+      >
+        <!-- (content.id === !selectedContent && selfControlNav) = terpilih dan tidak bisa ngontrol navigasi -->
+        <!-- (content.id !== selectedContent) = tidak terpilih -->
+        <!-- Dashboard 0  -->
+        <div
+          class="sidebar-content-inner"
+          v-if="
+            content.hasChildren ||
+            (content.id == selectedContent && !selfControlNav)
+          "
+        >
+          <content-sidebar
+            :content="content"
+            :mouse-over="mouseOver"
+          ></content-sidebar>
+        </div>
         <inertia-link
-          v-if="!content.hasChildren"
+          v-else
           :href="content.url"
           preserve-state
+          replace
           class="columns sidebar-content-inner col-oneline"
         >
           <content-sidebar
@@ -29,12 +48,6 @@
             :mouse-over="mouseOver"
           ></content-sidebar>
         </inertia-link>
-        <div class="sidebar-content-inner" v-else>
-          <content-sidebar
-            :content="content"
-            :mouse-over="mouseOver"
-          ></content-sidebar>
-        </div>
       </div>
       <div
         class="children-content"
@@ -43,15 +56,29 @@
       >
         <div class="divider"></div>
         <div
-          v-for="(children, index2) in content.children"
-          :key="index2"
-          @click="sidebarClicked(index2, index)"
-          :class="contentActive(index2, index)"
+          v-for="children in content.children"
+          :key="children.id"
+          @click="sidebarClicked(children.id, content.id)"
+          :class="contentActive(children.id, content.id)"
         >
+          <div
+            class="sidebar-content-inner"
+            v-if="
+              children.hasChildren ||
+              (content.id * 10 + children.id == selectedContent &&
+                !selfControlNav)
+            "
+          >
+            <content-sidebar
+              :content="children"
+              :mouse-over="mouseOver"
+            ></content-sidebar>
+          </div>
           <inertia-link
-            v-if="!children.hasChildren"
+            v-else
             :href="children.url"
             preserve-state
+            replace
             class="columns sidebar-content-inner col-oneline"
           >
             <content-sidebar
@@ -82,7 +109,9 @@ export default {
       type: Boolean,
     },
     selectedContent: String,
+    selfControlNav: { type: Boolean, default: false },
   },
+  emits: ["sidebarContentSelected"],
   setup(props, { emit }) {
     // console.log(config.contentsHome);
     const mouseOver = ref(false);
@@ -141,9 +170,11 @@ export default {
         ((indexParent === -1 && !content.hasChildren) || indexParent > -1)
       ) {
         mouseOver.value = false;
+        emit("sidebarContentSelected", true);
         // let title = indexParent === -1 ? content.title : contents.value[indexParent].children[index].title
+      } else {
+        emit("sidebarContentSelected", false);
       }
-      emit("SidebarContentSelected");
     };
 
     return {
@@ -276,6 +307,7 @@ export default {
     margin-bottom: 20px;
   }
   .sidebar-container {
+    overflow-x: hidden;
     left: -260px;
     width: 260px;
     height: 102%;

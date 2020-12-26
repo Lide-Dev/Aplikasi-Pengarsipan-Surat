@@ -15,7 +15,7 @@ class Sifatsurat extends Migration
     {
         Schema::create('sifatsurat', function (Blueprint $table) {
             $table->tinyIncrements('id');
-            $table->string('name',50);
+            $table->string('nama',50);
         });
     }
 

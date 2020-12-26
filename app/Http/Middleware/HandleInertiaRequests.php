@@ -40,8 +40,7 @@ class HandleInertiaRequests extends Middleware
             'user' => fn () => $request->user()
                 ? $request->user()->only('id', 'username')
                 : null,
-            'authToast' => session('authToast'),
-            'loginToast' => session('loginToast'),
+            'toast' => session('toast'),
         ]);
         // dd(parent::share($request),$props);
         $props = collect($props)->filter(function ($value, $key) {

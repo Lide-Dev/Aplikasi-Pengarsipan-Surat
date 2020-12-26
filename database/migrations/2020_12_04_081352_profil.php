@@ -20,7 +20,6 @@ class Profil extends Migration
             $table->string('nip', 18)->nullable();
             $table->string('no_telpon')->nullable();
             $table->timestamps();
-
             $table->foreign('id_jabatan')->references('id')->on('jabatan')->restrictOnDelete();
         });
     }

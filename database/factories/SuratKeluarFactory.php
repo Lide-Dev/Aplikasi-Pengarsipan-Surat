@@ -28,7 +28,7 @@ class SuratKeluarFactory extends Factory
             'tujuan'=> $this->faker->company,
             'alamat'=> $this->faker->address,
             'perihal'=> $this->faker->sentences(1, true),
-            'tembusan'=> $this->faker->sentences(1, true),
+            // 'tembusan'=> $this->faker->sentences(1, true),
             'isi_ringkas' => $this->faker->sentences(3,true)
         ];
     }

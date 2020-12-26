@@ -13,6 +13,7 @@ class SuratMasuk extends Model
 
     protected $table = 'suratmasuk';
     protected $guarded = [
+        'id',
         'created_at',
         'updated_at',
         'deleted_at',

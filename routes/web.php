@@ -22,9 +22,19 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('auth');
 Route::get('/home', [HomeController::class, 'index'])->name('home')->middleware('auth');
 Route::get('/employees', [EmployeeController::class, 'index'])->name('employee')->middleware('auth');
-Route::get('/archives/create', [SaveMailController::class, 'index'])->name('mails.create')->middleware('auth');
-Route::get('/mails/inbox', [ManageMailController::class, 'indexInbox'])->name('mails.inbox')->middleware('auth');
-Route::get('/mails/sent', [ManageMailController::class, 'indexSent'])->name('mails.sent')->middleware('auth');
+
+Route::get('/mails/inbox', [ManageMailController::class, 'inboxIndex'])->name('mails.inbox')->middleware('auth');
+Route::get('/mails/inbox/create', [SaveMailController::class, 'inboxIndex'])->name('mails.inbox.create')->middleware('auth');
+Route::get('/mails/inbox/create/copy', [SaveMailController::class, 'getTembusan'])->name('mails.inbox.copy.create')->middleware(['auth', 'snakecase']);
+Route::post('/mails/inbox/create', [SaveMailController::class, 'createMail'])->name('mails.inbox.create.post')->middleware(['auth', 'snakecase']);
+Route::post('/mails/inbox/create/copy', [SaveMailController::class, 'createTembusan'])->name('mails.sent.copy')->middleware(['auth', 'snakecase']);
+
+Route::get('/mails/sent', [ManageMailController::class, 'sentIndex'])->name('mails.sent')->middleware('auth');
+Route::get('/mails/sent/create', [SaveMailController::class, 'sentIndex'])->name('mails.sent.create')->middleware('auth');
+Route::get('/mails/sent/create/copy', [SaveMailController::class, 'getTembusan'])->name('mails.sent.copy')->middleware(['auth', 'snakecase']);
+Route::post('/mails/sent/create', [SaveMailController::class, 'createMail'])->name('mails.sent.create.post')->middleware(['auth', 'snakecase']);
+Route::post('/mails/sent/create/copy', [SaveMailController::class, 'createTembusan'])->name('mails.sent.copy.create')->middleware(['auth', 'snakecase']);
+
 Route::get('/errors/{error}', [UtilityController::class, 'errorHandler'])->name('error');
 
 Route::get('/login', [LoginController::class, 'show'])->name('auth');

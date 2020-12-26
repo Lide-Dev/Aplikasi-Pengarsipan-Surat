@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class Dokumen extends Migration
+class SmDokumen extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,15 @@ class Dokumen extends Migration
      */
     public function up()
     {
-        Schema::create('dokumen', function (Blueprint $table) {
+        Schema::create('dokumen_sm', function (Blueprint $table) {
             $table->id();
-            $table->string('nama',255);
-            $table->string('alias',255);
-            $table->string('tipe',15);
+            $table->string('nama', 255);
+            $table->string('alias', 255);
+            $table->string('tipe', 15);
             $table->unsignedInteger('ukuran');
             $table->timestamps();
+            $table->unsignedBigInteger('id_suratmasuk');
+            $table->foreign('id_suratmasuk')->references('id')->on('suratmasuk')->cascadeOnDelete();
         });
     }
 
@@ -30,7 +32,7 @@ class Dokumen extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('dokumen');
+        Schema::dropIfExists('dokumen_sm');
         //
     }
 }

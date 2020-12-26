@@ -5,6 +5,7 @@
     @sidebar-content-selected="sidebarSelected"
     :toggle="toggleSidebar"
     :selected-content="dyComponent.selectedContent.toString()"
+    :self-control-nav="dyComponent.selfControlNavigation"
     class=""
   />
   <div class="content">
@@ -21,28 +22,15 @@
       ></div>
     </transition>
   </div>
-  <div
-    v-if="showPopover"
-    @click="hidePopover"
-    class="outside-popover"
-  ></div>
-  <div v-if="showPopover" class="popover" :style="realCoordinatePopover">
-    Test
-  </div>
+  <popover
+    :visibility="popoverState"
+    :coordinate="popoverCoordinate"
+    :content="popoverContents"
+  ></popover>
 </template>
 
 <script>
-import {
-  ref,
-  reactive,
-  onMounted,
-  watch,
-  computed,
-  onUpdated,
-  provide,
-  inject,
-} from "vue";
-import { provideConfig } from "../../components/ProvideHome";
+import { ref, reactive, computed, onUpdated, provide } from "vue";
 import config from "../../constants/config";
 import useBreakpoint from "../../Components/UseBreakpoint";
 
@@ -53,72 +41,63 @@ export default {
       type: Object,
     },
     errors: Object,
-    // tableData: Object,
-    // tableConfig: Object,
+    toast: String,
+    selfControlNavigation: { type: Boolean, default: false },
     user: Object,
   },
   setup(props, context) {
     // const propsDyComponent = reactive(props.dyComponent.props);
+    const popoverState = ref(false);
+    const popoverCoordinate = reactive({ x: 0, y: 0 });
+    const popoverContents = ref([]);
     const toggleSidebar = ref(false);
-    const showPopover = ref(false);
-    const coordinatePopover = reactive({
-      top: 0,
-      left: 0,
-    });
 
-    const realCoordinatePopover = computed(() => {
-      let coordinate = { top: coordinatePopover.top };
-      coordinatePopover.left === 0
-        ? (coordinate.right = coordinatePopover.right)
-        : (coordinate.left = coordinatePopover.left);
-      return coordinate;
-    });
+    const getPopoverState = computed(() => popoverState.value);
     const title = computed(
       () => config.componentsTitleHome[props.dyComponent.name].title
     );
 
-    const toggleClicked = () => {
+    function toggleClicked() {
+      console.log("Toggle Sidebar Clicked.");
+      setPopoverState(false);
       toggleSidebar.value = !toggleSidebar.value;
-    };
+    }
 
-    const sidebarSelected = () => {
-      console.log("Emit of sidebar");
-      showPopover.value = false;
-      if (toggleSidebar.value) toggleSidebar.value = false;
-    };
+    function sidebarSelected(isContent = false) {
+      console.log("Emit of sidebar", isContent);
+      setPopoverState(false);
+      if (toggleSidebar.value && isContent) toggleSidebar.value = false;
+    }
 
-    const showPopoverSet = (val, obj) => {
-      let coordinate = obj.coordinate;
-      let maxWidth = useBreakpoint().width.value;
-      coordinatePopover.top = coordinate.y;
-      if (coordinate.x <= maxWidth / 2) {
-        coordinatePopover.left = coordinate.x + 10;
-      } else {
-        coordinatePopover.left = coordinate.x - maxWidth / 2.83;
+    function setPopoverCoordinate(coordinate = { x: 0, y: 0 }) {
+      popoverCoordinate.x = coordinate.x;
+      popoverCoordinate.y = coordinate.y;
+    }
+
+    function setPopoverState(value) {
+      console.log("Popover being set to ", value);
+      if (typeof value === "boolean") popoverState.value = value;
+      else {
+        popoverContents.value = value;
       }
-      showPopover.value = val;
-    };
+    }
 
-    const hidePopover = () => {
-      showPopover.value = false;
-    };
+    provide("getPopoverState", getPopoverState);
+    provide("setPopoverState", setPopoverState);
+    provide("setPopoverCoordinate", setPopoverCoordinate);
 
     onUpdated(() => {
       console.log("UPDATED!");
     });
 
-    provide("showPopover", showPopover);
-    provide("showPopoverSet", showPopoverSet);
-
     return {
+      popoverContents,
+      popoverCoordinate,
+      popoverState,
+      sidebarSelected,
+      title,
       toggleClicked,
       toggleSidebar,
-      sidebarSelected,
-      realCoordinatePopover,
-      coordinatePopover,
-      title,
-      showPopover,
-      hidePopover,
     };
   },
 };
@@ -132,28 +111,9 @@ export default {
   padding-left: 75px;
   padding-right: 20px;
   width: 100vw;
-  min-height: 98vh;
+  min-height: 80vh;
   z-index: 0;
   overflow: hidden;
-}
-
-.popover {
-  position: fixed;
-  width: 35vw;
-  height: 10vh;
-  background-color: gray;
-  z-index: 10;
-}
-
-.outside-popover {
-  position: fixed;
-  width: 100vw;
-  top: 0;
-  min-height: 100vh;
-  /* background-color: blue; */
-  /* pointer-events: none; */
-  opacity: 0.4;
-  z-index: 5;
 }
 
 @media only screen and (max-width: 840px) {
@@ -167,7 +127,7 @@ export default {
     position: fixed;
     opacity: 0.5;
     background: grey;
-    z-index: 1;
+    z-index: 5;
     width: 110vw;
     min-height: 100vh;
     overflow: hidden;
