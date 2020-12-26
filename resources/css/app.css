@@ -608,7 +608,7 @@ dl dt {
 }
 
 dl dd {
-  margin: 0.4rem 0 0.8rem 0;
+  margin: 0.4rem 0 0.8rem;
 }
 
 html:lang(zh),
@@ -1654,7 +1654,7 @@ video.video-responsive::before {
 }
 
 .figure {
-  margin: 0 0 0.4rem 0;
+  margin: 0 0 0.4rem;
 }
 
 .figure .figure-caption {
@@ -2873,7 +2873,7 @@ summary.accordion-header::-webkit-details-marker {
 
 .pagination .page-item span {
   display: inline-block;
-  padding: 0.2rem 0.2rem;
+  padding: 0.2rem;
 }
 
 .pagination .page-item a {
@@ -3101,7 +3101,7 @@ summary.accordion-header::-webkit-details-marker {
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
   list-style: none;
-  margin: 0.2rem 0 0.15rem 0;
+  margin: 0.2rem 0 0.15rem;
 }
 
 .tab .tab-item {
@@ -3113,7 +3113,7 @@ summary.accordion-header::-webkit-details-marker {
   color: inherit;
   display: block;
   margin: 0 0.4rem 0 0;
-  padding: 0.4rem 0.2rem 0.3rem 0.2rem;
+  padding: 0.4rem 0.2rem 0.3rem;
   text-decoration: none;
 }
 
