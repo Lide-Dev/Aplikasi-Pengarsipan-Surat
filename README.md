@@ -1,6 +1,7 @@
 # Aplikasi Pengarsipan Surat
 
 **Status** : Development
+**Percentage** : 45%
 
 Mendigitalisasi arsip surat berbasis web. Surat yang didalam termasuk surat masuk dan surat keluar termasuk disposisi.
 
